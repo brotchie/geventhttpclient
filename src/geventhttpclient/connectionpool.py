@@ -183,11 +183,12 @@ else:
             'cert_reqs': gevent.ssl.CERT_REQUIRED
         }
 
-        ssl_context_factory = getattr(gevent.ssl, "create_default_context", None)
+        ssl_context_factory = staticmethod(getattr(gevent.ssl, "create_default_context", None))
 
         def __init__(self, host, port, **kw):
             self.ssl_options = kw.pop("ssl_options", {})
-            self.ssl_context_factory = kw.pop('ssl_context_factory', None)
+            self.ssl_options['server_hostname'] = host
+            self.ssl_context_factory = kw.pop('ssl_context_factory', None) or self.ssl_context_factory
             self.insecure = kw.pop('insecure', False)
             super(SSLConnectionPool, self).__init__(host, port, **kw)
 
